@@ -35,10 +35,11 @@ function RingProgress({ value, total }: { value: number; total: number }) {
 export function FaseSidebar({ sessao, faseAtiva, carregando, onSelectFase }: Props) {
   const totalFases = ORDEM_FASES.length;
   const fasesCompletas = ORDEM_FASES.filter(f => sessao.outputs[`fase${f}`]).length;
+  const pct = Math.round((fasesCompletas / totalFases) * 100);
 
   return (
     <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col">
-      {/* Header */}
+      {/* Header do projeto */}
       <div className="px-5 py-5 border-b border-border">
         <div className="flex items-start gap-3">
           <RingProgress value={fasesCompletas} total={totalFases} />
@@ -48,15 +49,28 @@ export function FaseSidebar({ sessao, faseAtiva, carregando, onSelectFase }: Pro
               {sessao.dadosIniciais.nomeProjeto}
             </h2>
             <p className="text-xs text-muted-fg mt-1 truncate">{sessao.dadosIniciais.indicacaoClinica}</p>
-            <p className="text-xs text-muted-fg mt-1">
-              {fasesCompletas}/{totalFases} fases
-            </p>
           </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mt-3.5">
+          <div className="flex justify-between items-center mb-1.5">
+            <span className="text-xs text-muted-fg">Progresso</span>
+            <span className="text-xs font-semibold text-primary">{pct}%</span>
+          </div>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-fg mt-1">{fasesCompletas} de {totalFases} fases concluídas</p>
         </div>
       </div>
 
       {/* Stepper */}
       <nav className="flex-1 overflow-y-auto py-5 px-4">
+        <p className="text-xs font-semibold text-muted-fg uppercase tracking-wider px-2 mb-3">Etapas</p>
         <div className="relative">
           {/* Vertical connecting line */}
           <div className="absolute left-[15px] top-5 bottom-5 w-px bg-border z-0" />
@@ -72,12 +86,12 @@ export function FaseSidebar({ sessao, faseAtiva, carregando, onSelectFase }: Pro
                   key={faseKey}
                   onClick={() => onSelectFase(faseKey)}
                   disabled={carregando}
-                  className={`relative flex items-center gap-3 w-full text-left py-2 px-2 rounded-xl transition-all
+                  className={`relative flex items-start gap-3 w-full text-left py-2 px-2 rounded-xl transition-all
                     ${ativa ? 'bg-primary/8' : 'hover:bg-muted/60'}
                     ${carregando ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {/* Step indicator */}
-                  <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold z-10 border-2 transition-all
+                  <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold z-10 border-2 transition-all mt-0.5
                     ${concluida
                       ? 'bg-success border-success text-success-fg'
                       : ativa
@@ -92,14 +106,19 @@ export function FaseSidebar({ sessao, faseAtiva, carregando, onSelectFase }: Pro
                     }
                   </div>
 
-                  {/* Label */}
-                  <span className={`text-sm truncate leading-tight ${
-                    ativa ? 'font-semibold text-primary'
-                    : concluida ? 'text-gray-600'
-                    : 'text-muted-fg'
-                  }`}>
-                    {fase.nome}
-                  </span>
+                  {/* Label + description */}
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-sm block truncate leading-tight ${
+                      ativa ? 'font-semibold text-primary'
+                      : concluida ? 'text-gray-700 font-medium'
+                      : 'text-muted-fg'
+                    }`}>
+                      {fase.nome}
+                    </span>
+                    <span className="text-xs text-muted-fg truncate block leading-tight mt-0.5">
+                      {fase.descricao}
+                    </span>
+                  </div>
                 </button>
               );
             })}

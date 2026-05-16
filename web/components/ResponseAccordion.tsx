@@ -182,6 +182,27 @@ export function ResponseAccordion({ conteudo, cor, carregando }: Props) {
   const borderClass = COR_BORDA[cor] || COR_BORDA.blue;
   const headerClass = COR_HEADER_BG[cor] || COR_HEADER_BG.blue;
 
+  const isLastSection = (i: number) => i === sections.length - 1;
+
+  function sectionBadge(section: Section, i: number) {
+    if (carregando && isLastSection(i)) {
+      return (
+        <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-fg font-medium shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-muted-fg animate-pulse inline-block" />
+          Gerando
+        </span>
+      );
+    }
+    if (section.content.length > 40) {
+      return (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20 font-medium shrink-0">
+          Concluído
+        </span>
+      );
+    }
+    return null;
+  }
+
   return (
     <div className="space-y-2">
       {sections.map((section, i) => (
@@ -190,11 +211,14 @@ export function ResponseAccordion({ conteudo, cor, carregando }: Props) {
             onClick={() => toggleSection(i)}
             className={`w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-sm transition-colors duration-200 ${headerClass}`}
           >
-            <span>{section.title}</span>
-            {openSections[i]
-              ? <ChevronUp size={14} className="shrink-0 ml-2 opacity-50" />
-              : <ChevronDown size={14} className="shrink-0 ml-2 opacity-50" />
-            }
+            <span className="truncate mr-2">{section.title}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              {sectionBadge(section, i)}
+              {openSections[i]
+                ? <ChevronUp size={14} className="opacity-50" />
+                : <ChevronDown size={14} className="opacity-50" />
+              }
+            </div>
           </button>
           {openSections[i] && section.content && (
             <div className="px-5 py-4 bg-card">
@@ -203,7 +227,7 @@ export function ResponseAccordion({ conteudo, cor, carregando }: Props) {
           )}
         </div>
       ))}
-      {carregando && (
+      {carregando && sections.length === 0 && (
         <div className="flex items-center gap-2 px-4 py-2 text-muted-fg text-sm">
           <span className="inline-block w-1.5 h-4 bg-muted animate-pulse rounded-sm" />
           <span>Gerando...</span>
