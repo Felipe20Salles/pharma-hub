@@ -1,6 +1,6 @@
 node_modules/
 dist/
 .env
-sessoes/
+/sessoes/
 exports/
 *.js.map

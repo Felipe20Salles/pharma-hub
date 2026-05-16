@@ -19,7 +19,7 @@ export default function SessaoPage({ params }: { params: Promise<{ id: string }>
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    fetch(`/api/sessoes/${id}`)
+    fetch(`/api/sessao/${id}`)
       .then(r => r.json())
       .then((s: Sessao) => {
         setSessao(s);
@@ -62,7 +62,7 @@ export default function SessaoPage({ params }: { params: Promise<{ id: string }>
       }
 
       // Recarrega sessão para sincronizar estado
-      const sessaoAtualizada: Sessao = await fetch(`/api/sessoes/${id}`).then(r => r.json());
+      const sessaoAtualizada: Sessao = await fetch(`/api/sessao/${id}`).then(r => r.json());
       setSessao(sessaoAtualizada);
     } catch (e) {
       setErro('Erro ao consultar agente. Verifique sua chave de API.');
