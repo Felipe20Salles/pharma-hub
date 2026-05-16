@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada' }), { status: 500 });
   }
 
-  const sessao = carregarSessao(sessaoId);
+  const sessao = await carregarSessao(sessaoId);
   if (!sessao) {
     return new Response(JSON.stringify({ error: 'Sessão não encontrada' }), { status: 404 });
   }
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         ];
         sessao.historico[chaveHistorico] = novoHistorico;
         sessao.outputs[`fase${faseKey}`] = respostaCompleta;
-        salvarSessao(sessao);
+        await salvarSessao(sessao);
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Erro desconhecido';
         controller.enqueue(encoder.encode(`\n\n❌ Erro: ${msg}`));
