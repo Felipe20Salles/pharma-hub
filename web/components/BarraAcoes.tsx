@@ -36,101 +36,105 @@ export function BarraAcoes({
   const idxAtual = ORDEM_FASES.indexOf(faseKey);
   const temProxima = idxAtual < ORDEM_FASES.length - 1;
   const proximaFase = temProxima ? FASES[ORDEM_FASES[idxAtual + 1]] : null;
-
-  // Phase 1: block "next phase" if formula not confirmed
   const bloqueadoSemFormula = faseAtiva === '1' && temConteudo && !formulaConfirmada;
 
   return (
-    <div className="border-t border-gray-100 bg-white px-6 py-4 space-y-3">
-      {/* Campo de ajuste */}
-      {temConteudo && (
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={ajuste}
-            onChange={e => setAjuste(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleEnviarAjuste()}
-            placeholder="Peça um ajuste ao agente..."
-            disabled={carregando}
-            className="flex-1 text-sm border border-gray-200 rounded-lg px-4 py-2.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 disabled:opacity-50 disabled:bg-gray-50 transition-all"
-          />
-          <button
-            onClick={handleEnviarAjuste}
-            disabled={!ajuste.trim() || carregando}
-            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-sm font-medium"
-          >
-            {carregando ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-            Enviar
-          </button>
-        </div>
-      )}
-
-      {/* Ações principais */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {!temConteudo && (
+    <div className="border-t border-border bg-card/95 backdrop-blur-sm px-5 py-3.5 shrink-0">
+      {!temConteudo ? (
+        /* Estado inicial — só botão de iniciar */
+        <div className="flex justify-center">
           <button
             onClick={onIniciar}
             disabled={carregando}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-fg rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-sm"
           >
             {carregando ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
             Iniciar fase
           </button>
-        )}
-
-        {/* Phase 1: confirm formula button or confirmed badge */}
-        {faseAtiva === '1' && temConteudo && (
-          formulaConfirmada ? (
-            <span className="flex items-center gap-1.5 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium">
-              <CheckCircle size={15} />
-              Fórmula confirmada ✓
-            </span>
-          ) : (
-            <button
-              onClick={onConfirmarFormula}
+        </div>
+      ) : (
+        /* Estado com conteúdo — barra completa em uma linha */
+        <div className="flex items-center gap-3">
+          {/* Input de ajuste (flex-1) */}
+          <div className="flex flex-1 gap-2 min-w-0">
+            <input
+              type="text"
+              value={ajuste}
+              onChange={e => setAjuste(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleEnviarAjuste()}
+              placeholder="Peça um ajuste ao agente..."
               disabled={carregando}
-              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-sm"
+              className="flex-1 text-sm border border-border rounded-lg px-4 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:bg-muted transition-all min-w-0"
+            />
+            <button
+              onClick={handleEnviarAjuste}
+              disabled={!ajuste.trim() || carregando}
+              className="px-3.5 py-2 bg-muted text-muted-fg rounded-lg hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 text-sm font-medium shrink-0"
             >
-              <CheckCircle size={15} />
-              ✅ Confirmar Fórmula Final
+              {carregando ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              Enviar
             </button>
-          )
-        )}
+          </div>
 
-        {/* Phase 3: return to phase 1 button */}
-        {faseAtiva === '3' && temConteudo && onRetornarFase1 && (
-          <button
-            onClick={onRetornarFase1}
-            disabled={carregando}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium"
-          >
-            <RotateCcw size={15} />
-            ↩ Retornar à Fase 1 para ajuste
-          </button>
-        )}
+          {/* Separador */}
+          <div className="w-px h-8 bg-border shrink-0" />
 
-        {temConteudo && temProxima && (
-          <button
-            onClick={onProximaFase}
-            disabled={carregando || bloqueadoSemFormula}
-            title={bloqueadoSemFormula ? 'Confirme a fórmula antes de avançar' : undefined}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm text-gray-600"
-          >
-            <SkipForward size={15} />
-            Próxima: {proximaFase?.nome}
-          </button>
-        )}
+          {/* Grupo de ações (direita) */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Fase 1: confirmar fórmula */}
+            {faseAtiva === '1' && (
+              formulaConfirmada ? (
+                <span className="flex items-center gap-1.5 px-3 py-2 bg-success/10 text-success rounded-lg text-sm font-medium border border-success/20">
+                  <CheckCircle size={14} />
+                  Confirmada
+                </span>
+              ) : (
+                <button
+                  onClick={onConfirmarFormula}
+                  disabled={carregando}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-success text-success-fg rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-sm"
+                >
+                  <CheckCircle size={14} />
+                  Confirmar Fórmula
+                </button>
+              )
+            )}
 
-        {temConteudo && (
-          <button
-            onClick={onExportar}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all text-sm text-gray-600 ml-auto"
-          >
-            <Download size={15} />
-            Exportar Markdown
-          </button>
-        )}
-      </div>
+            {/* Fase 3: retornar à fase 1 */}
+            {faseAtiva === '3' && onRetornarFase1 && (
+              <button
+                onClick={onRetornarFase1}
+                disabled={carregando}
+                className="flex items-center gap-1.5 px-3 py-2 border border-border rounded-lg hover:bg-muted/60 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm text-muted-fg"
+              >
+                <RotateCcw size={13} />
+                Voltar Fase 1
+              </button>
+            )}
+
+            {/* Próxima fase */}
+            {temProxima && (
+              <button
+                onClick={onProximaFase}
+                disabled={carregando || bloqueadoSemFormula}
+                title={bloqueadoSemFormula ? 'Confirme a fórmula antes de avançar' : undefined}
+                className="flex items-center gap-1.5 px-4 py-2 border border-border rounded-lg hover:bg-muted/60 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm text-gray-600"
+              >
+                <SkipForward size={14} />
+                {proximaFase?.nome}
+              </button>
+            )}
+
+            {/* Exportar — ghost */}
+            <button
+              onClick={onExportar}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-muted/60 transition-all text-sm text-muted-fg"
+            >
+              <Download size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

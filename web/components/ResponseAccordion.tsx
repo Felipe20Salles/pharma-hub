@@ -41,40 +41,74 @@ function parseResponse(text: string): Section[] {
 }
 
 const COR_BORDA: Record<string, string> = {
-  violet:  'border-violet-200 hover:border-violet-400',
-  purple:  'border-purple-200 hover:border-purple-400',
-  blue:    'border-blue-200 hover:border-blue-400',
-  sky:     'border-sky-200 hover:border-sky-400',
-  green:   'border-green-200 hover:border-green-400',
-  emerald: 'border-emerald-200 hover:border-emerald-400',
-  amber:   'border-amber-200 hover:border-amber-400',
-  cyan:    'border-cyan-200 hover:border-cyan-400',
-  rose:    'border-rose-200 hover:border-rose-400',
+  violet:  'border-violet-200 hover:border-violet-300',
+  purple:  'border-purple-200 hover:border-purple-300',
+  blue:    'border-blue-200 hover:border-blue-300',
+  sky:     'border-sky-200 hover:border-sky-300',
+  green:   'border-green-200 hover:border-green-300',
+  emerald: 'border-emerald-200 hover:border-emerald-300',
+  amber:   'border-amber-200 hover:border-amber-300',
+  cyan:    'border-cyan-200 hover:border-cyan-300',
+  rose:    'border-rose-200 hover:border-rose-300',
 };
 
 const COR_HEADER_BG: Record<string, string> = {
-  violet:  'bg-violet-50 text-violet-800 hover:bg-violet-100',
-  purple:  'bg-purple-50 text-purple-800 hover:bg-purple-100',
-  blue:    'bg-blue-50 text-blue-800 hover:bg-blue-100',
-  sky:     'bg-sky-50 text-sky-800 hover:bg-sky-100',
-  green:   'bg-green-50 text-green-800 hover:bg-green-100',
-  emerald: 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100',
-  amber:   'bg-amber-50 text-amber-800 hover:bg-amber-100',
-  cyan:    'bg-cyan-50 text-cyan-800 hover:bg-cyan-100',
-  rose:    'bg-rose-50 text-rose-800 hover:bg-rose-100',
+  violet:  'bg-violet-50/80 text-violet-800 hover:bg-violet-100/80',
+  purple:  'bg-purple-50/80 text-purple-800 hover:bg-purple-100/80',
+  blue:    'bg-blue-50/80 text-blue-800 hover:bg-blue-100/80',
+  sky:     'bg-sky-50/80 text-sky-800 hover:bg-sky-100/80',
+  green:   'bg-green-50/80 text-green-800 hover:bg-green-100/80',
+  emerald: 'bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100/80',
+  amber:   'bg-amber-50/80 text-amber-800 hover:bg-amber-100/80',
+  cyan:    'bg-cyan-50/80 text-cyan-800 hover:bg-cyan-100/80',
+  rose:    'bg-rose-50/80 text-rose-800 hover:bg-rose-100/80',
 };
 
-const COR_TABLE_HEAD: Record<string, string> = {
-  violet:  'bg-violet-100 text-violet-900',
-  purple:  'bg-purple-100 text-purple-900',
-  blue:    'bg-blue-100 text-blue-900',
-  sky:     'bg-sky-100 text-sky-900',
-  green:   'bg-green-100 text-green-900',
-  emerald: 'bg-emerald-100 text-emerald-900',
-  amber:   'bg-amber-100 text-amber-900',
-  cyan:    'bg-cyan-100 text-cyan-900',
-  rose:    'bg-rose-100 text-rose-900',
+const COR_TABLE_TH: Record<string, string> = {
+  violet:  'bg-violet-50 text-violet-700',
+  purple:  'bg-purple-50 text-purple-700',
+  blue:    'bg-blue-50 text-blue-700',
+  sky:     'bg-sky-50 text-sky-700',
+  green:   'bg-green-50 text-green-700',
+  emerald: 'bg-emerald-50 text-emerald-700',
+  amber:   'bg-amber-50 text-amber-700',
+  cyan:    'bg-cyan-50 text-cyan-700',
+  rose:    'bg-rose-50 text-rose-700',
 };
+
+function EvidenciaBadge({ label }: { label: string }) {
+  const lower = label.toLowerCase();
+  if (lower === 'forte') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-success/12 text-success border border-success/20">
+        ● Forte
+      </span>
+    );
+  }
+  if (lower === 'moderada') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-warning/12 text-warning border border-warning/20">
+        ● Moderada
+      </span>
+    );
+  }
+  if (lower === 'fraca' || lower === 'limitada' || lower === 'empírica') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-muted text-muted-fg border border-border">
+        ● {label}
+      </span>
+    );
+  }
+  return null;
+}
+
+function extractText(children: React.ReactNode): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) {
+    return children.map(c => extractText(c as React.ReactNode)).join('');
+  }
+  return '';
+}
 
 interface Props {
   conteudo: string;
@@ -83,7 +117,7 @@ interface Props {
 }
 
 function MarkdownContent({ content, cor }: { content: string; cor: string }) {
-  const tableHead = COR_TABLE_HEAD[cor] || COR_TABLE_HEAD.blue;
+  const thClass = COR_TABLE_TH[cor] || COR_TABLE_TH.blue;
 
   return (
     <ReactMarkdown
@@ -91,34 +125,43 @@ function MarkdownContent({ content, cor }: { content: string; cor: string }) {
       components={{
         h1: ({ children }) => <h1 className="text-base font-bold text-gray-800 mt-4 mb-2 first:mt-0">{children}</h1>,
         h2: ({ children }) => <h2 className="text-sm font-bold text-gray-800 mt-3 mb-1.5 first:mt-0">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-sm font-semibold text-gray-700 mt-2 mb-1 first:mt-0">{children}</h3>,
+        h3: ({ children }) => <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-fg mt-3 mb-1.5 first:mt-0">{children}</h3>,
         p: ({ children }) => <p className="text-sm text-gray-700 leading-relaxed mb-2 last:mb-0">{children}</p>,
-        strong: ({ children }) => <strong className="font-semibold text-gray-800">{children}</strong>,
-        em: ({ children }) => <em className="italic text-gray-600">{children}</em>,
+        strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+        em: ({ children }) => <em className="italic text-gray-500">{children}</em>,
         ul: ({ children }) => <ul className="text-sm text-gray-700 space-y-1 mb-2 pl-4 list-disc">{children}</ul>,
         ol: ({ children }) => <ol className="text-sm text-gray-700 space-y-1 mb-2 pl-4 list-decimal">{children}</ol>,
         li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-        hr: () => <hr className="border-gray-100 my-3" />,
+        hr: () => <hr className="border-border my-4" />,
         code: ({ children }) => (
-          <code className="bg-gray-100 text-gray-700 text-xs px-1.5 py-0.5 rounded font-mono">{children}</code>
+          <code className="bg-muted text-gray-700 text-xs px-1.5 py-0.5 rounded font-mono">{children}</code>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l-2 border-gray-200 pl-3 text-gray-500 italic my-2">{children}</blockquote>
+          <blockquote className="border-l-2 border-border pl-3 text-muted-fg italic my-2">{children}</blockquote>
         ),
         table: ({ children }) => (
-          <div className="overflow-x-auto my-3 rounded-lg border border-gray-100 shadow-sm">
+          <div className="overflow-x-auto my-4 rounded-xl border border-border shadow-sm">
             <table className="w-full text-xs border-collapse">{children}</table>
           </div>
         ),
-        thead: ({ children }) => <thead className={tableHead}>{children}</thead>,
-        tbody: ({ children }) => <tbody className="divide-y divide-gray-100">{children}</tbody>,
-        tr: ({ children }) => <tr className="even:bg-gray-50/60">{children}</tr>,
+        thead: ({ children }) => <thead className={thClass}>{children}</thead>,
+        tbody: ({ children }) => <tbody className="divide-y divide-border">{children}</tbody>,
+        tr: ({ children }) => <tr className="hover:bg-muted/50 even:bg-muted/30 transition-colors">{children}</tr>,
         th: ({ children }) => (
-          <th className="px-3 py-2 text-left font-semibold text-xs uppercase tracking-wide first:rounded-tl-lg last:rounded-tr-lg">
+          <th className="px-4 py-2.5 text-left text-xs uppercase tracking-wider font-semibold border-b border-border">
             {children}
           </th>
         ),
-        td: ({ children }) => <td className="px-3 py-2 text-gray-700 align-top">{children}</td>,
+        td: ({ children }) => {
+          const text = extractText(children).trim();
+          const badge = <EvidenciaBadge label={text} />;
+          const hasBadge = ['forte', 'moderada', 'fraca', 'limitada', 'empírica'].includes(text.toLowerCase());
+          return (
+            <td className="px-4 py-3 text-gray-700 align-top leading-relaxed">
+              {hasBadge ? badge : children}
+            </td>
+          );
+        },
       }}
     >
       {content}
@@ -142,27 +185,27 @@ export function ResponseAccordion({ conteudo, cor, carregando }: Props) {
   return (
     <div className="space-y-2">
       {sections.map((section, i) => (
-        <div key={i} className={`border rounded-xl overflow-hidden transition-all ${borderClass}`}>
+        <div key={i} className={`border rounded-xl overflow-hidden transition-all duration-200 ${borderClass}`}>
           <button
             onClick={() => toggleSection(i)}
-            className={`w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-sm transition-colors ${headerClass}`}
+            className={`w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-sm transition-colors duration-200 ${headerClass}`}
           >
             <span>{section.title}</span>
             {openSections[i]
-              ? <ChevronUp size={15} className="shrink-0 ml-2 opacity-60" />
-              : <ChevronDown size={15} className="shrink-0 ml-2 opacity-60" />
+              ? <ChevronUp size={14} className="shrink-0 ml-2 opacity-50" />
+              : <ChevronDown size={14} className="shrink-0 ml-2 opacity-50" />
             }
           </button>
           {openSections[i] && section.content && (
-            <div className="px-5 py-4 bg-white">
+            <div className="px-5 py-4 bg-card">
               <MarkdownContent content={section.content} cor={cor} />
             </div>
           )}
         </div>
       ))}
       {carregando && (
-        <div className="flex items-center gap-2 px-4 py-2 text-gray-400 text-sm">
-          <span className="inline-block w-1.5 h-4 bg-gray-300 animate-pulse rounded-sm" />
+        <div className="flex items-center gap-2 px-4 py-2 text-muted-fg text-sm">
+          <span className="inline-block w-1.5 h-4 bg-muted animate-pulse rounded-sm" />
           <span>Gerando...</span>
         </div>
       )}
