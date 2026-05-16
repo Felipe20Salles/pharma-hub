@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Sessao } from './types';
 
 const DIR = path.resolve(process.cwd(), '..', 'sessoes');
