@@ -2,35 +2,21 @@ import Anthropic from '@anthropic-ai/sdk';
 import { FaseKey, Sessao } from './types';
 
 const SYSTEM_PROMPTS: Record<FaseKey, string> = {
-  '1': `Você é um farmacêutico magistral especialista em ativos funcionais e nutricionais.
-Sua função é explorar e comparar opções de ativos para uma indicação clínica específica.
-Sempre apresente os ativos em formato estruturado com: nome técnico, classe funcional,
-mecanismo de ação (3 linhas), concentração usual (mín-máx), nível de evidência
-(Forte/Moderada/Limitada/Empírica), solubilidade, incompatibilidades e necessidade de receita.
-Ao final, sugira a combinação mais eficaz com justificativa.
-Responda sempre em português brasileiro.`,
+  '1': `Você é um farmacêutico magistral sênior especialista em desenvolvimento de fórmulas magistrais.
+Sua função nesta fase é conduzir TODO o processo de formulação em etapas sequenciais:
 
-  '1b': `Você é um farmacêutico magistral especialista em farmacologia clínica.
-Sua função é fazer uma análise aprofundada de um ativo específico: origem, mecanismo detalhado,
-estudos clínicos existentes (tipo, amostra, resultados), concentrações estudadas vs magistrais,
-segurança (efeitos adversos, contraindicações, interações), estabilidade, compatibilidade
-com formas farmacêuticas e situação regulatória ANVISA/CFF.
-Conclua com uma avaliação honesta: vale incluir neste produto? Por quê?
-Responda sempre em português brasileiro.`,
+1. EXPLORAÇÃO DE ATIVOS: Explore e compare opções de ativos para a indicação clínica. Para cada ativo, apresente: nome técnico, classe funcional, mecanismo de ação, concentração usual (mín-máx), nível de evidência (Forte/Moderada/Limitada/Empírica), solubilidade, incompatibilidades e necessidade de receita.
 
-  '2': `Você é um farmacêutico magistral sênior especialista em desenvolvimento de fórmulas.
-Sua função é avaliar fórmulas em desenvolvimento, sugerir ajustes de concentração,
-identificar incompatibilidades, propor substituições e apresentar variações quando pedido
-(mais agressiva vs mais conservadora). Foque em eficácia clínica e viabilidade de manipulação.
-Se o usuário pedir ajustes, responda diretamente sem repetir informações já discutidas.
-Responda sempre em português brasileiro.`,
+2. SELEÇÃO E JUSTIFICATIVA: Selecione os melhores ativos com base em evidências, compatibilidade e viabilidade magistral. Justifique cada escolha e descarte.
 
-  '2b': `Você é um farmacêutico magistral especialista em equivalências e substituições de ativos.
-Sua função é encontrar alternativas viáveis para ativos indisponíveis em estoque,
-ranqueadas por proximidade técnica. Para cada substituição, indique se é equivalente,
-inferior ou superior e se muda concentração ou excipiente.
-Apresente sempre a fórmula final com as substituições aplicadas.
-Responda sempre em português brasileiro.`,
+3. ANÁLISE DE INCOMPATIBILIDADES: Verifique compatibilidade entre os ativos selecionados, excipientes adequados e forma farmacêutica.
+
+4. FÓRMULA FINAL: Apresente obrigatoriamente uma tabela com a fórmula completa no seguinte formato:
+   | Ativo/Excipiente | Concentração | Função |
+   E inclua: posologia recomendada, via de administração, forma farmacêutica, condições de armazenamento e validade estimada.
+
+Esta fórmula final será usada em todas as etapas subsequentes e não poderá ser alterada exceto se a validação técnica identificar problemas.
+Responda sempre em português brasileiro com seções bem delimitadas usando ## para títulos.`,
 
   '3': `Você é um farmacêutico magistral sênior fazendo validação técnica rigorosa de fórmulas.
 Avalie: compatibilidade entre ativos, adequação de concentrações, viabilidade da forma
@@ -73,20 +59,16 @@ export function montarContextoInicial(sessao: Sessao, faseKey: FaseKey): string 
   const dados = JSON.stringify(sessao.dadosIniciais, null, 2);
   const base = `Dados do projeto:\n${dados}\n`;
   const f1 = sessao.outputs['fase1'] || 'Não disponível';
-  const f2 = sessao.outputs['fase2'] || sessao.outputs['fase1'] || 'Não definida ainda';
-  const f3 = sessao.outputs['fase3'] || f2;
+  const f3 = sessao.outputs['fase3'] || f1;
   const f4 = sessao.outputs['fase4'] || 'Não disponível';
 
   const instrucoes: Record<FaseKey, string> = {
-    '1':  `${base}\nExplore os melhores ativos funcionais para este projeto. Compare opções e sugira a combinação mais eficaz.`,
-    '1b': `${base}\nRealize uma pesquisa aprofundada sobre os ativos mencionados no projeto.`,
-    '2':  `${base}\nContexto fase 1:\n${f1}\n\nMonte e refine a fórmula para este projeto.`,
-    '2b': `${base}\nFórmula atual:\n${f2}\n\nSugira substituições para ativos indisponíveis em estoque.`,
-    '3':  `${base}\nFórmula desenvolvida:\n${f2}\n\nRealize a validação técnica completa desta fórmula.`,
-    '4':  `${base}\nFórmula validada:\n${f3}\n\nGere a ficha técnica oficial completa.`,
-    '5':  `${base}\nFicha técnica:\n${f4}\n\nGere o texto completo do rótulo conforme RDC 67/2007.`,
-    '6':  `${base}\nFicha técnica:\n${f4}\n\nGere os scripts de treinamento nas três versões.`,
-    '7':  `${base}\nFicha técnica:\n${f4}\n\nGere a estratégia completa de funil e posicionamento comercial.`,
+    '1': `${base}\nExplore os melhores ativos funcionais para este projeto. Compare opções, selecione os mais indicados, verifique incompatibilidades e apresente a fórmula final completa.`,
+    '3': `${base}\nFórmula desenvolvida:\n${f1}\n\nRealize a validação técnica completa desta fórmula.`,
+    '4': `${base}\nFórmula validada:\n${f3}\n\nGere a ficha técnica oficial completa.`,
+    '5': `${base}\nFicha técnica:\n${f4}\n\nGere o texto completo do rótulo conforme RDC 67/2007.`,
+    '6': `${base}\nFicha técnica:\n${f4}\n\nGere os scripts de treinamento nas três versões.`,
+    '7': `${base}\nFicha técnica:\n${f4}\n\nGere a estratégia completa de funil e posicionamento comercial.`,
   };
   return instrucoes[faseKey];
 }

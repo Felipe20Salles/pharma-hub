@@ -2,22 +2,28 @@
 
 import { useState } from 'react';
 import { FaseKey, FASES, ORDEM_FASES } from '@/lib/types';
-import { Send, SkipForward, Download, Loader2, Play } from 'lucide-react';
+import { Send, SkipForward, Download, Loader2, Play, CheckCircle, RotateCcw } from 'lucide-react';
 
 interface Props {
   faseKey: FaseKey;
   sessaoId: string;
   temConteudo: boolean;
   carregando: boolean;
+  faseAtiva: FaseKey;
+  formulaConfirmada: boolean;
   onIniciar: () => void;
   onAjuste: (texto: string) => void;
   onProximaFase: () => void;
   onExportar: () => void;
+  onConfirmarFormula: () => void;
+  onRetornarFase1?: () => void;
 }
 
 export function BarraAcoes({
   faseKey, temConteudo, carregando,
+  faseAtiva, formulaConfirmada,
   onIniciar, onAjuste, onProximaFase, onExportar,
+  onConfirmarFormula, onRetornarFase1,
 }: Props) {
   const [ajuste, setAjuste] = useState('');
 
@@ -30,6 +36,9 @@ export function BarraAcoes({
   const idxAtual = ORDEM_FASES.indexOf(faseKey);
   const temProxima = idxAtual < ORDEM_FASES.length - 1;
   const proximaFase = temProxima ? FASES[ORDEM_FASES[idxAtual + 1]] : null;
+
+  // Phase 1: block "next phase" if formula not confirmed
+  const bloqueadoSemFormula = faseAtiva === '1' && temConteudo && !formulaConfirmada;
 
   return (
     <div className="border-t border-gray-100 bg-white px-6 py-4 space-y-3">
@@ -69,10 +78,42 @@ export function BarraAcoes({
           </button>
         )}
 
+        {/* Phase 1: confirm formula button or confirmed badge */}
+        {faseAtiva === '1' && temConteudo && (
+          formulaConfirmada ? (
+            <span className="flex items-center gap-1.5 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium">
+              <CheckCircle size={15} />
+              Fórmula confirmada ✓
+            </span>
+          ) : (
+            <button
+              onClick={onConfirmarFormula}
+              disabled={carregando}
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium shadow-sm"
+            >
+              <CheckCircle size={15} />
+              ✅ Confirmar Fórmula Final
+            </button>
+          )
+        )}
+
+        {/* Phase 3: return to phase 1 button */}
+        {faseAtiva === '3' && temConteudo && onRetornarFase1 && (
+          <button
+            onClick={onRetornarFase1}
+            disabled={carregando}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm font-medium"
+          >
+            <RotateCcw size={15} />
+            ↩ Retornar à Fase 1 para ajuste
+          </button>
+        )}
+
         {temConteudo && temProxima && (
           <button
             onClick={onProximaFase}
-            disabled={carregando}
+            disabled={carregando || bloqueadoSemFormula}
+            title={bloqueadoSemFormula ? 'Confirme a fórmula antes de avançar' : undefined}
             className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm text-gray-600"
           >
             <SkipForward size={15} />

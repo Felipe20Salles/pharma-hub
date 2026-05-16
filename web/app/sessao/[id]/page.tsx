@@ -17,12 +17,14 @@ export default function SessaoPage({ params }: { params: Promise<{ id: string }>
   const [conteudoAtual, setConteudoAtual] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+  const [formulaConfirmada, setFormulaConfirmada] = useState(false);
 
   useEffect(() => {
     fetch(`/api/sessao/${id}`)
       .then(r => r.json())
       .then((s: Sessao) => {
         setSessao(s);
+        setFormulaConfirmada(s.formulaConfirmada ?? false);
         const ultimaFase = ORDEM_FASES.find(f => s.outputs[`fase${f}`]);
         if (ultimaFase) setFaseAtiva(ultimaFase);
       })
@@ -86,6 +88,31 @@ export default function SessaoPage({ params }: { params: Promise<{ id: string }>
     window.open(`/api/exportar?id=${id}`, '_blank');
   };
 
+  const handleConfirmarFormula = async () => {
+    if (!sessao) return;
+    const atualizada = { ...sessao, formulaConfirmada: true };
+    await fetch(`/api/sessao/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formulaConfirmada: true }),
+    });
+    setSessao(atualizada);
+    setFormulaConfirmada(true);
+  };
+
+  const handleRetornarFase1 = () => {
+    setFaseAtiva('1');
+    setConteudoAtual(sessao?.outputs['fase1'] || '');
+    // Unlock formula for re-editing
+    fetch(`/api/sessao/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formulaConfirmada: false }),
+    });
+    setSessao(prev => prev ? { ...prev, formulaConfirmada: false } : prev);
+    setFormulaConfirmada(false);
+  };
+
   if (erro) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
@@ -141,10 +168,14 @@ export default function SessaoPage({ params }: { params: Promise<{ id: string }>
             sessaoId={id}
             temConteudo={!!conteudoAtual}
             carregando={carregando}
+            faseAtiva={faseAtiva}
+            formulaConfirmada={formulaConfirmada}
             onIniciar={handleIniciar}
             onAjuste={handleAjuste}
             onProximaFase={handleProximaFase}
             onExportar={handleExportar}
+            onConfirmarFormula={handleConfirmarFormula}
+            onRetornarFase1={handleRetornarFase1}
           />
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { FASES, FaseKey } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import { ResponseAccordion } from '@/components/ResponseAccordion';
 
 interface Props {
   faseKey: FaseKey;
@@ -45,17 +46,16 @@ export function ChatArea({ faseKey, conteudo, carregando }: Props) {
         {!carregando && !conteudo && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-300 gap-3">
             <span className="text-5xl opacity-30">💊</span>
-            <p className="text-sm">Clique em <strong>"Iniciar fase"</strong> para consultar o agente.</p>
+            <p className="text-sm">Clique em <strong>&quot;Iniciar fase&quot;</strong> para consultar o agente.</p>
           </div>
         )}
 
         {conteudo && (
-          <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
-            {conteudo}
-            {carregando && (
-              <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse rounded-sm" />
-            )}
-          </div>
+          <ResponseAccordion
+            conteudo={conteudo}
+            cor={fase.cor}
+            carregando={carregando}
+          />
         )}
       </div>
     </div>

@@ -35,11 +35,12 @@ export async function listarSessoes(): Promise<Sessao[]> {
 
 export function exportarMarkdown(sessao: Sessao): string {
   const NOMES: Record<string, string> = {
-    fase1: '🔬 Exploração de Ativos', fase1b: '🧪 Pesquisa Profunda',
-    fase2: '⚗️ Montagem da Fórmula',  fase2b: '📦 Substituição por Estoque',
-    fase3: '✅ Validação Final',       fase4: '📄 Ficha Técnica Oficial',
-    fase5: '🏷️ Rótulo',               fase6: '🎓 Scripts de Treinamento',
-    fase7: '📈 Funil e Posicionamento',
+    fase1:  '🔬 Exploração de Ativos e Fórmula',
+    fase3:  '✅ Validação Final',
+    fase4:  '📄 Ficha Técnica Oficial',
+    fase5:  '🏷️ Rótulo',
+    fase6:  '🎓 Scripts de Treinamento',
+    fase7:  '📈 Funil e Posicionamento',
   };
   const linhas = [
     `# PharmaHub — ${sessao.dadosIniciais.nomeProjeto}`,
