@@ -1,31 +1,36 @@
-import fs from 'node:fs';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { Sessao } from './types';
 
-const DIR = path.resolve(process.cwd(), '..', 'sessoes');
+const DIR = path.join(process.cwd(), '..', 'sessoes');
 
-function garantirDir() {
-  if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
+async function garantirDir() {
+  await fs.mkdir(DIR, { recursive: true });
 }
 
-export function salvarSessao(sessao: Sessao): void {
-  garantirDir();
+export async function salvarSessao(sessao: Sessao): Promise<void> {
+  await garantirDir();
   sessao.atualizadaEm = new Date().toISOString();
-  fs.writeFileSync(path.join(DIR, `${sessao.id}.json`), JSON.stringify(sessao, null, 2), 'utf-8');
+  await fs.writeFile(path.join(DIR, `${sessao.id}.json`), JSON.stringify(sessao, null, 2), 'utf-8');
 }
 
-export function carregarSessao(id: string): Sessao | null {
+export async function carregarSessao(id: string): Promise<Sessao | null> {
   const arquivo = path.join(DIR, `${id}.json`);
-  if (!fs.existsSync(arquivo)) return null;
-  return JSON.parse(fs.readFileSync(arquivo, 'utf-8')) as Sessao;
+  try {
+    const conteudo = await fs.readFile(arquivo, 'utf-8');
+    return JSON.parse(conteudo) as Sessao;
+  } catch {
+    return null;
+  }
 }
 
-export function listarSessoes(): Sessao[] {
-  garantirDir();
-  const arquivos = fs.readdirSync(DIR).filter(f => f.endsWith('.json'));
-  return arquivos
-    .map(f => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf-8')) as Sessao)
-    .sort((a, b) => new Date(b.atualizadaEm).getTime() - new Date(a.atualizadaEm).getTime());
+export async function listarSessoes(): Promise<Sessao[]> {
+  await garantirDir();
+  const arquivos = (await fs.readdir(DIR)).filter(f => f.endsWith('.json'));
+  const sessoes = await Promise.all(
+    arquivos.map(async f => JSON.parse(await fs.readFile(path.join(DIR, f), 'utf-8')) as Sessao)
+  );
+  return sessoes.sort((a, b) => new Date(b.atualizadaEm).getTime() - new Date(a.atualizadaEm).getTime());
 }
 
 export function exportarMarkdown(sessao: Sessao): string {
