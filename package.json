@@ -1,0 +1,27 @@
+{
+  "name": "pharma-hub",
+  "version": "1.0.0",
+  "description": "Assistente multi-agente para farmacêuticos magistrais",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "dev": "ts-node-dev src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.0.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
