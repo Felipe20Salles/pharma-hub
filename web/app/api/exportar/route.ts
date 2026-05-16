@@ -1,5 +1,6 @@
-import { carregarSessao } from '@/lib/storage';
-import { exportarMarkdown } from '@/lib/storage';
+import { carregarSessao, exportarMarkdown } from '@/lib/storage';
+
+export const runtime = 'nodejs';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
