@@ -12,7 +12,7 @@ interface Section {
 }
 
 function parseResponse(text: string): Section[] {
-  const parts = text.split(/^(#{1,3} .+)$/m);
+  const parts = text.split(/^(#{1,2} .+)$/m);
 
   if (parts.length <= 1) {
     const paragraphs = text.split(/\n{2,}/).filter(p => p.trim());
@@ -30,7 +30,7 @@ function parseResponse(text: string): Section[] {
   }
 
   for (let i = 1; i < parts.length; i += 2) {
-    const title = parts[i].replace(/^#{1,3} /, '').trim();
+    const title = parts[i].replace(/^#{1,2} /, '').trim();
     const content = (parts[i + 1] || '').trim();
     if (title || content) {
       sections.push({ title, content, defaultOpen: i === 1 });
